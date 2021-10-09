@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using StudentsAdmin.API.Models;
+using StudentsAdmin.API.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,10 +31,18 @@ namespace StudentsAdmin.API
         {
 
             services.AddControllers();
+            services.AddDbContext<StudentAdminDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultCnx")));
+
+            services.AddTransient<IStudentRepository, StudentRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentsAdmin.API", Version = "v1" });
             });
+        }
+
+        private int IStudentRepository()
+        {
+            throw new NotImplementedException();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
