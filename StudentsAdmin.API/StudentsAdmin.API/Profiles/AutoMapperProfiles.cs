@@ -9,6 +9,7 @@ namespace StudentsAdmin.API.Profiles
         public AutoMapperProfiles()
         {
             CreateMap<UpdateStudentRequest , Student>().AfterMap<UpdateStudentRequestAfterMap>();
+            CreateMap<AddStudentRequest, Student>().AfterMap<AddStudentRequestAfterMap>();
         }
     }
 }
