@@ -1,19 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using StudentsAdmin.API.Models;
 using StudentsAdmin.API.Repository;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
 
 namespace StudentsAdmin.API
 {
@@ -29,6 +24,16 @@ namespace StudentsAdmin.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors((options) =>
+            {
+                options.AddPolicy("angularApplication", (builder) =>
+                {
+                    builder.WithOrigins("*")
+                     .AllowAnyHeader()
+                     .WithMethods("GET", "POST", "PUT", "DELETE")
+                     .WithExposedHeaders("*");
+                });
+            });
 
             services.AddControllers();
             services.AddDbContext<StudentAdminDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultCnx")));
@@ -38,6 +43,7 @@ namespace StudentsAdmin.API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentsAdmin.API", Version = "v1" });
             });
+            services.AddAutoMapper(typeof(Startup));
         }
 
         private int IStudentRepository()
@@ -58,6 +64,8 @@ namespace StudentsAdmin.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("angularApplication");
 
             app.UseAuthorization();
 
