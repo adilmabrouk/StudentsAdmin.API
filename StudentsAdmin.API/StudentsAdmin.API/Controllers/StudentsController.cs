@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using StudentsAdmin.API.Models;
 using StudentsAdmin.API.Repository;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace StudentsAdmin.API.Controllers
@@ -12,11 +13,13 @@ namespace StudentsAdmin.API.Controllers
     {
         protected readonly IStudentRepository _studentRepository;
         protected readonly IMapper _mapper;
+        protected readonly IImageRepository _imageRepository;   
 
-        public StudentsController(IStudentRepository studentRepository , IMapper mapper)
+        public StudentsController(IStudentRepository studentRepository , IMapper mapper, IImageRepository imageRepository)
         {
             _studentRepository = studentRepository;  
-            _mapper = mapper;   
+            _mapper = mapper;
+            _imageRepository = imageRepository; 
         }
 
 
@@ -76,6 +79,27 @@ namespace StudentsAdmin.API.Controllers
         {
            var student = await _studentRepository.AddStudentAsync(_mapper.Map<Student>(request));
            return CreatedAtAction(nameof(GetStudentByIdAsync),new {studentId = student.Id}, _mapper.Map<Student>(student));
+        }
+
+        [HttpPost]
+        [Route("api/[controller]/{studentId:guid}/upload-image")]
+        public async Task<IActionResult> UploadImage([FromRoute] Guid studentId, IFormFile profileImage)
+        {
+            if (await _studentRepository.Exists(studentId))
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(profileImage.FileName);
+                var fileImagePath = await _imageRepository.Upload(profileImage , fileName);
+                if(await _studentRepository.UpdateProfileImage(studentId, fileImagePath))
+                {
+                    return Ok(fileImagePath);
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError,"Error Uploading Image");
+                }
+                
+            }
+            return NotFound();
         }
 
     }

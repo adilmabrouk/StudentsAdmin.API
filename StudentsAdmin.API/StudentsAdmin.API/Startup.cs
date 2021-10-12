@@ -9,6 +9,8 @@ using StudentsAdmin.API.Models;
 using StudentsAdmin.API.Repository;
 using System;
 using AutoMapper;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace StudentsAdmin.API
 {
@@ -38,7 +40,8 @@ namespace StudentsAdmin.API
             services.AddControllers();
             services.AddDbContext<StudentAdminDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultCnx")));
 
-            services.AddTransient<IStudentRepository, StudentRepository>();
+            services.AddScoped<IStudentRepository, StudentRepository>();
+            services.AddScoped<IImageRepository, StorageImageRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentsAdmin.API", Version = "v1" });
@@ -62,6 +65,12 @@ namespace StudentsAdmin.API
             }
 
             app.UseHttpsRedirection();
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Resources")),
+                RequestPath = "/Resources"
+            });
 
             app.UseRouting();
 
