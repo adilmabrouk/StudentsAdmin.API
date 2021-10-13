@@ -11,6 +11,7 @@ using System;
 using AutoMapper;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using FluentValidation.AspNetCore;
 
 namespace StudentsAdmin.API
 {
@@ -38,6 +39,8 @@ namespace StudentsAdmin.API
             });
 
             services.AddControllers();
+
+            services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>());
             services.AddDbContext<StudentAdminDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultCnx")));
 
             services.AddScoped<IStudentRepository, StudentRepository>();
